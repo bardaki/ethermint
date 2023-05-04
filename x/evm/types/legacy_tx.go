@@ -1,7 +1,9 @@
 package types
 
 import (
+	"encoding/json"
 	"math/big"
+	time "time"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -158,6 +160,11 @@ func (tx *LegacyTx) SetSignatureValues(_, v, r, s *big.Int) {
 
 // Validate performs a stateless validation of the tx fields.
 func (tx LegacyTx) Validate() error {
+	startTime := time.Now()
+	println("\033[31m"+"Validate (ethermint) Start for %s: ", startTime.String()+"")
+	res2B, _ := json.Marshal(tx)
+	println(string(res2B))
+
 	gasPrice := tx.GetGasPrice()
 	if gasPrice == nil {
 		return sdkerrors.Wrap(ErrInvalidGasPrice, "gas price cannot be nil")
@@ -187,6 +194,9 @@ func (tx LegacyTx) Validate() error {
 			return sdkerrors.Wrap(err, "invalid to address")
 		}
 	}
+
+	elapsedTime := time.Since(startTime)
+	println("\033[31m"+"Validate (ethermint) latency: %s", elapsedTime.String()+"")
 
 	return nil
 }
