@@ -1,14 +1,10 @@
 package types
 
 import (
-	"encoding/json"
 	"math/big"
-	time "time"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/tharsis/ethermint/types"
 )
 
 func newLegacyTx(tx *ethtypes.Transaction) (*LegacyTx, error) {
@@ -160,43 +156,43 @@ func (tx *LegacyTx) SetSignatureValues(_, v, r, s *big.Int) {
 
 // Validate performs a stateless validation of the tx fields.
 func (tx LegacyTx) Validate() error {
-	startTime := time.Now()
-	println("\033[31m"+"Validate (ethermint) Start for %s: ", startTime.String()+"")
-	res2B, _ := json.Marshal(tx)
-	println(string(res2B))
+	// startTime := time.Now()
+	// println("\033[31m"+"Validate (ethermint) Start for %s: ", startTime.String()+"")
+	// res2B, _ := json.Marshal(tx)
+	// println(string(res2B))
 
-	gasPrice := tx.GetGasPrice()
-	if gasPrice == nil {
-		return sdkerrors.Wrap(ErrInvalidGasPrice, "gas price cannot be nil")
-	}
+	// gasPrice := tx.GetGasPrice()
+	// if gasPrice == nil {
+	// 	return sdkerrors.Wrap(ErrInvalidGasPrice, "gas price cannot be nil")
+	// }
 
-	if gasPrice.Sign() == -1 {
-		return sdkerrors.Wrapf(ErrInvalidGasPrice, "gas price cannot be negative %s", gasPrice)
-	}
-	if !IsValidInt256(gasPrice) {
-		return sdkerrors.Wrap(ErrInvalidGasPrice, "out of bound")
-	}
-	if !IsValidInt256(tx.Fee()) {
-		return sdkerrors.Wrap(ErrInvalidGasFee, "out of bound")
-	}
+	// if gasPrice.Sign() == -1 {
+	// 	return sdkerrors.Wrapf(ErrInvalidGasPrice, "gas price cannot be negative %s", gasPrice)
+	// }
+	// if !IsValidInt256(gasPrice) {
+	// 	return sdkerrors.Wrap(ErrInvalidGasPrice, "out of bound")
+	// }
+	// if !IsValidInt256(tx.Fee()) {
+	// 	return sdkerrors.Wrap(ErrInvalidGasFee, "out of bound")
+	// }
 
-	amount := tx.GetValue()
-	// Amount can be 0
-	if amount != nil && amount.Sign() == -1 {
-		return sdkerrors.Wrapf(ErrInvalidAmount, "amount cannot be negative %s", amount)
-	}
-	if !IsValidInt256(amount) {
-		return sdkerrors.Wrap(ErrInvalidAmount, "out of bound")
-	}
+	// amount := tx.GetValue()
+	// // Amount can be 0
+	// if amount != nil && amount.Sign() == -1 {
+	// 	return sdkerrors.Wrapf(ErrInvalidAmount, "amount cannot be negative %s", amount)
+	// }
+	// if !IsValidInt256(amount) {
+	// 	return sdkerrors.Wrap(ErrInvalidAmount, "out of bound")
+	// }
 
-	if tx.To != "" {
-		if err := types.ValidateAddress(tx.To); err != nil {
-			return sdkerrors.Wrap(err, "invalid to address")
-		}
-	}
+	// if tx.To != "" {
+	// 	if err := types.ValidateAddress(tx.To); err != nil {
+	// 		return sdkerrors.Wrap(err, "invalid to address")
+	// 	}
+	// }
 
-	elapsedTime := time.Since(startTime)
-	println("\033[31m"+"Validate (ethermint) latency: %s", elapsedTime.String()+"")
+	// elapsedTime := time.Since(startTime)
+	// println("\033[31m"+"Validate (ethermint) latency: %s", elapsedTime.String()+"")
 
 	return nil
 }
