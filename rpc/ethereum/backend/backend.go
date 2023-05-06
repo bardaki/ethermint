@@ -844,7 +844,7 @@ func (e *EVMBackend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash
 	}
 
 	elapsedTime := time.Since(startTime)
-	println("\033[31m"+"SendTransaction (ethermint) latency for %s:  %s", txHash, elapsedTime.String()+"")
+	println("\033[31m"+"SendTransaction (ethermint) latency :  %s", elapsedTime.String()+"")
 
 	// Return transaction hash
 	return txHash, nil
