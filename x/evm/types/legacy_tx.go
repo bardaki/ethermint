@@ -166,6 +166,7 @@ func (tx LegacyTx) Validate() error {
 
 	gasPrice := tx.GetGasPrice()
 	if gasPrice == nil {
+		println("\033[31m" + "!!!!!!!!    gas price cannot be nil    !!!!!!!!!" + "")
 		return sdkerrors.Wrap(ErrInvalidGasPrice, "gas price cannot be nil")
 	}
 
