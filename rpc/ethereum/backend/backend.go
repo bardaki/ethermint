@@ -774,6 +774,7 @@ func (e *EVMBackend) GetTxByTxIndex(height int64, index uint) (*tmrpctypes.Resul
 
 func (e *EVMBackend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash, error) {
 	startTime := time.Now()
+	println("============================= SendTransaction ==================================")
 	println("\033[31m"+"SendTransaction (ethermint) Start :  %s", startTime.String()+"")
 	// Look up the wallet containing the requested signer
 	_, err := e.clientCtx.Keyring.KeyByAddress(sdk.AccAddress(args.From.Bytes()))

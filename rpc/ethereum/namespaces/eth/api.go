@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"time"
 
 	"github.com/tharsis/ethermint/ethereum/eip712"
 
@@ -495,6 +496,9 @@ func (e *PublicAPI) FillTransaction(args evmtypes.TransactionArgs) (*rpctypes.Si
 
 // SendRawTransaction send a raw Ethereum transaction.
 func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
+	startTime := time.Now()
+	println("============================ eth_sendRawTransaction ===================================")
+	println("\033[31m"+"eth_sendRawTransaction (ethermint) Start :  %s", startTime.String()+"")
 	e.logger.Debug("eth_sendRawTransaction", "length", len(data))
 
 	// RLP decode raw transaction bytes
@@ -546,6 +550,9 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 		e.logger.Error("failed to broadcast tx", "error", err.Error())
 		return txHash, err
 	}
+
+	elapsedTime := time.Since(startTime)
+	println("\033[31m"+"eth_sendRawTransaction (ethermint) latency :  %s", elapsedTime.String()+"")
 
 	return txHash, nil
 }
