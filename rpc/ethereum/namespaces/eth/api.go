@@ -527,6 +527,12 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 	}
 
 	cosmosTx, err := ethereumTx.BuildTx(e.clientCtx.TxConfig.NewTxBuilder(), res.Params.EvmDenom)
+
+	res2B, _ := json.Marshal(cosmosTx)
+	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
+	println(string(res2B))
+	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
+
 	if err != nil {
 		e.logger.Error("failed to build cosmos tx", "error", err.Error())
 		return common.Hash{}, err
@@ -534,6 +540,9 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 
 	// Encode transaction by default Tx encoder
 	txBytes, err := e.clientCtx.TxConfig.TxEncoder()(cosmosTx)
+	println("===========================================")
+	fmt.Print(txBytes)
+	println("===========================================")
 	if err != nil {
 		e.logger.Error("failed to encode eth tx using default encoder", "error", err.Error())
 		return common.Hash{}, err
