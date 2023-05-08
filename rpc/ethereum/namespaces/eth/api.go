@@ -514,6 +514,11 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 		return common.Hash{}, err
 	}
 
+	res2A, _ := json.Marshal(ethereumTx)
+	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+	println(res2A)
+	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
 	if err := ethereumTx.ValidateBasic(); err != nil {
 		e.logger.Debug("tx failed basic validation", "error", err.Error())
 		return common.Hash{}, err
@@ -530,7 +535,7 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 
 	res2B, _ := json.Marshal(cosmosTx)
 	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
-	println(string(res2B))
+	println(res2B)
 	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
 
 	if err != nil {
@@ -542,7 +547,7 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 	txBytes, err := e.clientCtx.TxConfig.TxEncoder()(cosmosTx)
 	println("===========================================")
 	fmt.Print(txBytes)
-	println("===========================================")
+	println("\n===========================================")
 	if err != nil {
 		e.logger.Error("failed to encode eth tx using default encoder", "error", err.Error())
 		return common.Hash{}, err
