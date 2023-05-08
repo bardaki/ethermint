@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -494,6 +495,15 @@ func (e *PublicAPI) FillTransaction(args evmtypes.TransactionArgs) (*rpctypes.Si
 	}, nil
 }
 
+func jsonPrettyPrint(in string) string {
+	var out bytes.Buffer
+	err := json.Indent(&out, []byte(in), "", "\t")
+	if err != nil {
+		return in
+	}
+	return out.String()
+}
+
 // SendRawTransaction send a raw Ethereum transaction.
 func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 	startTime := time.Now()
@@ -516,7 +526,7 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 
 	res2A, _ := json.Marshal(ethereumTx)
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	println(res2A)
+	println(jsonPrettyPrint(string(res2A)))
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
 	if err := ethereumTx.ValidateBasic(); err != nil {
@@ -534,9 +544,9 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 	cosmosTx, err := ethereumTx.BuildTx(e.clientCtx.TxConfig.NewTxBuilder(), res.Params.EvmDenom)
 
 	res2B, _ := json.Marshal(cosmosTx)
-	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
-	println(res2B)
-	println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
+	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+	println(jsonPrettyPrint(string(res2B)))
+	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
 	if err != nil {
 		e.logger.Error("failed to build cosmos tx", "error", err.Error())
