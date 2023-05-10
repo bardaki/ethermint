@@ -514,9 +514,9 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 		return common.Hash{}, err
 	}
 
-	a, err := json.MarshalIndent(ethereumTx, "", " ")
+	// a, err := json.MarshalIndent(ethereumTx, "", " ")
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	fmt.Print(string(a))
+	fmt.Print(ethereumTx)
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
 	if err := ethereumTx.ValidateBasic(); err != nil {
@@ -538,9 +538,9 @@ func (e *PublicAPI) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) 
 		return common.Hash{}, err
 	}
 
-	b, err := json.MarshalIndent(cosmosTx, "", " ")
+	// b, err := json.MarshalIndent(cosmosTx, "", " ")
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	fmt.Print(string(b))
+	fmt.Print(cosmosTx)
 	println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
 	// Encode transaction by default Tx encoder
