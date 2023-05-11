@@ -113,6 +113,8 @@ func (avd EthAccountVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx
 		// check whether the sender address is EOA
 		fromAddr := common.BytesToAddress(from)
 		acct := avd.evmKeeper.GetAccount(ctx, fromAddr)
+		println("\033[31m"+"From Address: %s, %s", fromAddr, from)
+		ctx.Logger().Error("From Address: %s, %s", fromAddr, from)
 
 		if acct == nil {
 			acc := avd.ak.NewAccountWithAddress(ctx, from)
