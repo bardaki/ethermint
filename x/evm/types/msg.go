@@ -205,11 +205,11 @@ func (msg MsgEthereumTx) ValidateBasic() error {
 		return err
 	}
 
-	// Validate Hash field after validated txData to avoid panic
-	txHash := msg.AsTransaction().Hash().Hex()
-	if msg.Hash != txHash {
-		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid tx hash %s, expected: %s", msg.Hash, txHash)
-	}
+	// // Validate Hash field after validated txData to avoid panic
+	// txHash := msg.AsTransaction().Hash().Hex()
+	// if msg.Hash != txHash {
+	// 	return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid tx hash %s, expected: %s", msg.Hash, txHash)
+	// }
 
 	return nil
 }
