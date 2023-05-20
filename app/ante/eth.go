@@ -135,6 +135,7 @@ func NewEthGasConsumeDecorator(
 // - sets the gas meter limit
 // - gas limit is greater than the block gas meter limit
 func (egcd EthGasConsumeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
+	ctx.Logger().Error("AnteHandle eth.go")
 	gasWanted := uint64(0)
 	// gas consumption limit already checked during CheckTx so there's no need to
 	// verify it again during ReCheckTx

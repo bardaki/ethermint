@@ -65,6 +65,12 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		sender, err := signer.Sender(ethTx)
+
+		ctx.Logger().Error("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s",
+			ethTx.Hash(),
+			signer.ChainID(),
+			ethTx.ChainId())
+
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrorInvalidSigner,
