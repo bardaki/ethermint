@@ -68,9 +68,10 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrorInvalidSigner,
-				"couldn't retrieve sender address from the ethereum transaction: %s, %s",
+				"couldn't retrieve sender address from the ethereum transaction: %s, %s, %s",
 				err.Error(),
 				signer.ChainID(),
+				ethTx.ChainId(),
 			)
 		}
 
