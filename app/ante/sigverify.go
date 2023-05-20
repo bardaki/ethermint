@@ -16,6 +16,7 @@
 package ante
 
 import (
+	"fmt"
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
@@ -66,10 +67,10 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		sender, err := signer.Sender(ethTx)
 
-		ctx.Logger().Error("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s",
-			ethTx.Hash(),
-			signer.ChainID(),
-			ethTx.ChainId())
+		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s",
+			ethTx.Hash().Hex(),
+			signer.ChainID().String(),
+			ethTx.ChainId().String())
 
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
