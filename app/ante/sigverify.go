@@ -67,6 +67,16 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		sender, err := signer.Sender(ethTx)
+		fmt.Printf("AnteHandle sigverify.go sender: %s",
+			sender.Hex())
+		if sender.Hex() == "0xB9439921CD59f9554772Bdf803F16a477E086fcB" {
+			fmt.Printf("AnteHandle sigverify.go ignore sender txs: %s",
+				sender.Hex())
+			return ctx, errorsmod.Wrapf(
+				errortypes.ErrorInvalidSigner,
+				"AnteHandle sigverify.go ignore sender txs: %s",
+				sender.Hex())
+		}
 
 		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
 			ethTx.Hash().Hex(),
