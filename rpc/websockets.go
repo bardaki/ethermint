@@ -48,8 +48,11 @@ import (
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 )
 
+var WsConnl *wsConn
+
 type WebsocketsServer interface {
 	Start()
+	// WriteJSON(interface{}) error
 }
 
 type SubscriptionResponseJSON struct {
@@ -139,10 +142,12 @@ func (s *websocketsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.readLoop(&wsConn{
+	WsConnl = &wsConn{
 		mux:  new(sync.Mutex),
 		conn: conn,
-	})
+	}
+
+	s.readLoop(WsConnl)
 }
 
 func (s *websocketsServer) sendErrResponse(wsConn *wsConn, msg string) {

@@ -25,8 +25,8 @@ import (
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
+	rpcl "github.com/evmos/ethermint/rpc"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	"github.com/gorilla/websocket"
 	// "github.com/tendermint/tendermint/libs/log"
 )
 
@@ -82,7 +82,7 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		sender, err := signer.Sender(ethTx)
 
 		// Get the websocket connection from the context.
-		wsConn := ctx.Value("wsConn").(*websocket.Conn)
+		// wsConn := ctx.Value("wsConn").(*websocket.Conn)
 		// Get the logger from the context.
 		// logger := ctx.Value("logger").(*log.Logger)
 		if subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID); ok && subscriptionID == "unconfirmed_tx" {
@@ -93,10 +93,8 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 				Params:  &SubscriptionResult{Subscription: subscriptionID, Result: tx},
 			}
 
-			err := wsConn.WriteJSON(res)
-			if err != nil {
-				// logger.Error("error sending subscription notification", "err", err)
-				return ctx, err
+			if rpcl.WsConnl != nil {
+				rpcl.WsConnl.WriteJSON(res)
 			}
 		}
 
