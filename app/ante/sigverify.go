@@ -24,12 +24,25 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	"github.com/gorilla/websocket"
+	// "github.com/tendermint/tendermint/libs/log"
 )
 
 // EthSigVerificationDecorator validates an ethereum signatures
 type EthSigVerificationDecorator struct {
 	evmKeeper EVMKeeper
+}
+type SubscriptionNotification struct {
+	Jsonrpc string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  *SubscriptionResult `json:"params"`
+}
+
+type SubscriptionResult struct {
+	Subscription rpc.ID      `json:"subscription"`
+	Result       interface{} `json:"result"`
 }
 
 // NewEthSigVerificationDecorator creates a new EthSigVerificationDecorator
@@ -67,16 +80,25 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		sender, err := signer.Sender(ethTx)
-		// fmt.Printf("AnteHandle sigverify.go sender: %s",
-		// 	sender.Hex())
-		// if sender.Hex() == "0xB9439921CD59f9554772Bdf803F16a477E086fcB" {
-		// 	fmt.Printf("AnteHandle sigverify.go ignore sender txs: %s",
-		// 		sender.Hex())
-		// 	return ctx, errorsmod.Wrapf(
-		// 		errortypes.ErrorInvalidSigner,
-		// 		"AnteHandle sigverify.go ignore sender txs: %s",
-		// 		sender.Hex())
-		// }
+
+		// Get the websocket connection from the context.
+		wsConn := ctx.Value("wsConn").(*websocket.Conn)
+		// Get the logger from the context.
+		// logger := ctx.Value("logger").(*log.Logger)
+		if subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID); ok && subscriptionID == "unconfirmed_tx" {
+			// Send notification to websocket client.
+			res := &SubscriptionNotification{
+				Jsonrpc: "2.0",
+				Method:  "unconfirmed_tx",
+				Params:  &SubscriptionResult{Subscription: subscriptionID, Result: tx},
+			}
+
+			err := wsConn.WriteJSON(res)
+			if err != nil {
+				// logger.Error("error sending subscription notification", "err", err)
+				return ctx, err
+			}
+		}
 
 		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
 			ethTx.Hash().Hex(),
