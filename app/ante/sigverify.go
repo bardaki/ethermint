@@ -81,10 +81,6 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		sender, err := signer.Sender(ethTx)
 
-		// Get the websocket connection from the context.
-		// wsConn := ctx.Value("wsConn").(*websocket.Conn)
-		// Get the logger from the context.
-		// logger := ctx.Value("logger").(*log.Logger)
 		if subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID); ok && subscriptionID == "newPendingTransactions" {
 			fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
 				ethTx.Hash().Hex(),
