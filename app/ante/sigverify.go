@@ -96,19 +96,14 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 			res := &SubscriptionNotification{
 				Jsonrpc: "2.0",
 				Method:  "eth_subscription",
-				Params:  &SubscriptionResult{Subscription: subscriptionID, Result: tx},
+				Params:  &SubscriptionResult{Subscription: subscriptionID, Result: ethTx},
 			}
 
 			if rpcl.WsConnl != nil {
+				fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				rpcl.WsConnl.WriteJSON(res)
 			}
 		}
-
-		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
-			ethTx.Hash().Hex(),
-			signer.ChainID().String(),
-			ethTx.ChainId().String(),
-			time.Now().String())
 
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
