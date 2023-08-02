@@ -18,7 +18,6 @@ package ante
 import (
 	"fmt"
 	"math/big"
-	"time"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -81,29 +80,27 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		sender, err := signer.Sender(ethTx)
 
-		subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
-		fmt.Printf("AnteHandle sigverify.go: %s, %v",
-			subscriptionID,
-			ok)
-		if ok && subscriptionID == "newPendingTransactions" {
-			fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
-				ethTx.Hash().Hex(),
-				signer.ChainID().String(),
-				ethTx.ChainId().String(),
-				time.Now().String())
+		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
+		fmt.Printf("AnteHandle sub id, hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
+		// if ok && subscriptionID == "newPendingTransactions" {
+		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
+		// 	ethTx.Hash().Hex(),
+		// 	signer.ChainID().String(),
+		// 	ethTx.ChainId().String(),
+		// 	time.Now().String())
 
-			// Send notification to websocket client.
-			res := &SubscriptionNotification{
-				Jsonrpc: "2.0",
-				Method:  "eth_subscription",
-				Params:  &SubscriptionResult{Subscription: subscriptionID, Result: ethTx},
-			}
-
-			if rpcl.WsConnl != nil {
-				fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-				rpcl.WsConnl.WriteJSON(res)
-			}
+		// Send notification to websocket client.
+		res := &SubscriptionNotification{
+			Jsonrpc: "2.0",
+			Method:  "eth_subscription",
+			Params:  &SubscriptionResult{Subscription: rpcl.SubID, Result: ethTx},
 		}
+
+		if rpcl.WsConnl != nil {
+			fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			rpcl.WsConnl.WriteJSON(res)
+		}
+		// }
 
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
