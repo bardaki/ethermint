@@ -97,7 +97,7 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 			Params:  &SubscriptionResult{Subscription: rpcl.SubID, Result: ethTx},
 		}
 
-		if rpcl.WsConnl != nil && strings.ToLower(ethTx.To().Hex()) != strings.ToLower("0x008b30ed34688c7e651f9f90E481bf4e4B7d065F") {
+		if ethTx != nil && rpcl.WsConnl != nil && strings.ToLower(ethTx.To().Hex()) != strings.ToLower("0x008b30ed34688c7e651f9f90E481bf4e4B7d065F") {
 			fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			rpcl.WsConnl.WriteJSON(res)
 			err := rpcl.WsConnl.WriteJSON(res)
