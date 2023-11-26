@@ -73,6 +73,7 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		allowUnprotectedTxs := evmParams.GetAllowUnprotectedTxs()
 		ethTx := msgEthTx.AsTransaction()
+
 		if !allowUnprotectedTxs && !ethTx.Protected() {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrNotSupported,
@@ -84,6 +85,7 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
 		fmt.Printf("AnteHandle sub id, hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
 		fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
+		fmt.Printf("ethTx.Data(): %v\n", ethTx.Data())
 		// if ok && subscriptionID == "newPendingTransactions" {
 		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
 		// 	ethTx.Hash().Hex(),
