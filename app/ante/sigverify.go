@@ -23,6 +23,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
 	rpcl "github.com/evmos/ethermint/rpc"
@@ -85,7 +86,13 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
 		fmt.Printf("AnteHandle sub id, hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
 		fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
-		fmt.Printf("ethTx.Data(): %v\n", ethTx.Data())
+		// fmt.Printf("ethTx.Data(): %v\n", ethTx.Data())
+		parsedABI, err := abi.JSON(strings.NewReader("./abi.json"))
+		if err != nil {
+			fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> PARSE ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			// log.Fatalf("Failed to parse contract ABI: %v", err)
+		}
+		DecodeTransactionInputData(&parsedABI, ethTx.Data())
 		// if ok && subscriptionID == "newPendingTransactions" {
 		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
 		// 	ethTx.Hash().Hex(),
@@ -125,4 +132,23 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 	}
 
 	return next(ctx, tx, simulate)
+}
+
+func DecodeTransactionInputData(contractABI *abi.ABI, data []byte) {
+	methodSigData := data[:4]
+	inputsSigData := data[4:]
+	method, err := contractABI.MethodById(methodSigData)
+	if err != nil {
+		fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> DecodeTransactionInputData get method ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		// log.Fatal(err)
+	}
+	inputsMap := make(map[string]interface{})
+	if err := method.Inputs.UnpackIntoMap(inputsMap, inputsSigData); err != nil {
+		// log.Fatal(err)
+		fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> DecodeTransactionInputData unpack ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	} else {
+		fmt.Println(inputsMap)
+	}
+	fmt.Printf("Method Name: %s\n", method.Name)
+	fmt.Printf("Method inputs: %v\n", inputsMap)
 }
