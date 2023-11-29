@@ -84,8 +84,8 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
 		fmt.Printf("AnteHandle sub id, hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
-		fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
-		fmt.Printf("AnteHandle sub id, value: %s, %s", rpcl.SubID, ethTx.Value().String())
+		// fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
+		// fmt.Printf("AnteHandle sub id, value: %s, %s", rpcl.SubID, ethTx.Value().String())
 
 		// if ok && subscriptionID == "newPendingTransactions" {
 		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
