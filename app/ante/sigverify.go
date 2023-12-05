@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -83,7 +84,12 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		sender, err := signer.Sender(ethTx)
 
 		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
-		fmt.Printf("AnteHandle sub id, hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
+		currentTime := time.Now()
+
+		// Format the time to include milliseconds
+		// Use .000 to include milliseconds
+		timeWithMilliseconds := currentTime.Format("2006-01-02 15:04:05.000")
+		fmt.Printf("\nAnteHandle sub id, Time: "+timeWithMilliseconds+"  , hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
 		// fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
 		// fmt.Printf("AnteHandle sub id, value: %s, %s", rpcl.SubID, ethTx.Value().String())
 
@@ -102,11 +108,11 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		if ethTx != nil && ethTx.To() != nil && rpcl.WsConnl != nil && strings.ToLower(ethTx.To().Hex()) != strings.ToLower("0x008b30ed34688c7e651f9f90E481bf4e4B7d065F") {
-			fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			rpcl.WsConnl.WriteJSON(res)
 			err := rpcl.WsConnl.WriteJSON(res)
 			if err != nil {
-				fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SOCKET ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+				fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SOCKET ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			}
 		}
 		// }
