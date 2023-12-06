@@ -62,7 +62,7 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 	chainID := esvd.evmKeeper.ChainID()
 	evmParams := esvd.evmKeeper.GetParams(ctx)
 	chainCfg := evmParams.GetChainConfig()
-	ethCfg := chainCfg.EthereumConfig(chainID)
+	ethCfg := chainCfg.EthereumConfig(big.NewInt(46))
 	blockNum := big.NewInt(ctx.BlockHeight())
 	signer := ethtypes.MakeSigner(ethCfg, blockNum)
 
