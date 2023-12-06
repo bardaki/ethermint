@@ -94,11 +94,11 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		// fmt.Printf("AnteHandle sub id, value: %s, %s", rpcl.SubID, ethTx.Value().String())
 
 		// if ok && subscriptionID == "newPendingTransactions" {
-		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
-		// 	ethTx.Hash().Hex(),
-		// 	signer.ChainID().String(),
-		// 	ethTx.ChainId().String(),
-		// 	time.Now().String())
+		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s",
+			ethTx.Hash().Hex(),
+			signer.ChainID().String(),
+			ethTx.ChainId().String(),
+			timeWithMilliseconds)
 
 		// Send notification to websocket client.
 		res := &SubscriptionNotification{

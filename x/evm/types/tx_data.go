@@ -16,6 +16,7 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -91,6 +92,7 @@ func NewTxDataFromTx(tx *ethtypes.Transaction) (TxData, error) {
 //
 // Ref: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
 func DeriveChainID(v *big.Int) *big.Int {
+	fmt.Printf("v: %v\n", v)
 	if v == nil || v.Sign() < 1 {
 		return nil
 	}
@@ -109,6 +111,7 @@ func DeriveChainID(v *big.Int) *big.Int {
 		return new(big.Int).SetUint64((v - 35) / 2)
 	}
 	v = new(big.Int).Sub(v, big.NewInt(35))
+	fmt.Printf("v.Div(v, big.NewInt(2)): %v\n", v.Div(v, big.NewInt(2)))
 	return v.Div(v, big.NewInt(2))
 }
 
