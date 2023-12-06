@@ -16,6 +16,7 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
@@ -79,6 +80,7 @@ func (tx *LegacyTx) Copy() TxData {
 // GetChainID returns the chain id field from the derived signature values
 func (tx *LegacyTx) GetChainID() *big.Int {
 	v, _, _ := tx.GetRawSignatureValues()
+	fmt.Printf("v: %v\n", v)
 	return DeriveChainID(v)
 }
 

@@ -16,6 +16,7 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
@@ -101,7 +102,7 @@ func (tx *DynamicFeeTx) GetChainID() *big.Int {
 	if tx.ChainID == nil {
 		return nil
 	}
-
+	fmt.Printf("tx.ChainID.BigInt(): %v\n", tx.ChainID.BigInt())
 	return tx.ChainID.BigInt()
 }
 
