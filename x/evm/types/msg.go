@@ -205,11 +205,11 @@ func (msg MsgEthereumTx) ValidateBasic() error {
 		return err
 	}
 
-	// // Validate Hash field after validated txData to avoid panic
-	// txHash := msg.AsTransaction().Hash().Hex()
-	// if msg.Hash != txHash {
-	// 	return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid tx hash %s, expected: %s", msg.Hash, txHash)
-	// }
+	// Validate Hash field after validated txData to avoid panic
+	txHash := msg.AsTransaction().Hash().Hex()
+	if msg.Hash != txHash {
+		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "invalid tx hash %s, expected: %s", msg.Hash, txHash)
+	}
 
 	return nil
 }
@@ -316,6 +316,10 @@ func (msg *MsgEthereumTx) GetFrom() sdk.AccAddress {
 // AsTransaction creates an Ethereum Transaction type from the msg fields
 func (msg MsgEthereumTx) AsTransaction() *ethtypes.Transaction {
 	txData, err := UnpackTxData(msg.Data)
+	v, r, s := txData.GetRawSignatureValues()
+	fmt.Printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+	fmt.Printf("v: %v\n", v)
+	txData.SetSignatureValues(big.NewInt(2222), big.NewInt(4479), r, s)
 	if err != nil {
 		return nil
 	}
