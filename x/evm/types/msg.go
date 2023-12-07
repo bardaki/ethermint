@@ -316,10 +316,10 @@ func (msg *MsgEthereumTx) GetFrom() sdk.AccAddress {
 // AsTransaction creates an Ethereum Transaction type from the msg fields
 func (msg MsgEthereumTx) AsTransaction() *ethtypes.Transaction {
 	txData, err := UnpackTxData(msg.Data)
-	v, r, s := txData.GetRawSignatureValues()
-	fmt.Printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-	fmt.Printf("v: %v\n", v)
-	txData.SetSignatureValues(big.NewInt(2222), big.NewInt(4479), r, s)
+	// v, r, s := txData.GetRawSignatureValues()
+	// fmt.Printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+	// fmt.Printf("v: %v\n", v)
+	// txData.SetSignatureValues(big.NewInt(2222), big.NewInt(4479), r, s)
 	if err != nil {
 		return nil
 	}
