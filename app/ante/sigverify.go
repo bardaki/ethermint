@@ -97,7 +97,8 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		// if ok && subscriptionID == "newPendingTransactions" {
 		v, _, _ := ethTx.RawSignatureValues()
-		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s, %s, %s",
+		fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s, %s, %s, %s",
+			err.Error(),
 			ethTx.Hash().Hex(),
 			signer.ChainID().String(),
 			ethTx.ChainId().String(),
