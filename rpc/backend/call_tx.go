@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"time"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -117,6 +118,8 @@ func (b *Backend) Resend(args evmtypes.TransactionArgs, gasPrice *hexutil.Big, g
 
 // SendRawTransaction send a raw Ethereum transaction.
 func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
+	now := time.Now()
+	fmt.Printf("\n++++++++++  ETHERMINT SendRawTransaction   ++++++++++")
 	// RLP decode raw transaction bytes
 	tx := &ethtypes.Transaction{}
 	if err := tx.UnmarshalBinary(data); err != nil {
@@ -162,9 +165,12 @@ func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 	}
 
 	txHash := ethereumTx.AsTransaction().Hash()
+	fmt.Printf("\ntxHash: %v\n", txHash)
 
 	syncCtx := b.clientCtx.WithBroadcastMode(flags.BroadcastSync)
 	rsp, err := syncCtx.BroadcastTx(txBytes)
+	elapsedTime := time.Since(now)
+	fmt.Printf("\n ======================== ETHERMINT SendRawTransactiontime: %v\n", elapsedTime)
 	if rsp != nil && rsp.Code != 0 {
 		err = errorsmod.ABCIError(rsp.Codespace, rsp.Code, rsp.RawLog)
 	}
@@ -172,7 +178,8 @@ func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 		b.logger.Error("failed to broadcast tx", "error", err.Error())
 		return txHash, err
 	}
-
+	elapsedTime2 := time.Since(now)
+	fmt.Printf("\n ======================== ETHERMINT SendRawTransactiontime return: %v\n", elapsedTime2)
 	return txHash, nil
 }
 
