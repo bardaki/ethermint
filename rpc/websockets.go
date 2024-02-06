@@ -48,8 +48,12 @@ import (
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 )
 
+var WsConnl *wsConn
+var SubID rpc.ID
+
 type WebsocketsServer interface {
 	Start()
+	// WriteJSON(interface{}) error
 }
 
 type SubscriptionResponseJSON struct {
@@ -139,10 +143,12 @@ func (s *websocketsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.readLoop(&wsConn{
+	WsConnl = &wsConn{
 		mux:  new(sync.Mutex),
 		conn: conn,
-	})
+	}
+
+	s.readLoop(WsConnl)
 }
 
 func (s *websocketsServer) sendErrResponse(wsConn *wsConn, msg string) {
@@ -241,18 +247,18 @@ func (s *websocketsServer) readLoop(wsConn *wsConn) {
 				continue
 			}
 
-			subID := rpc.NewID()
-			unsubFn, err := s.api.subscribe(wsConn, subID, params)
+			SubID := rpc.NewID()
+			unsubFn, err := s.api.subscribe(wsConn, SubID, params)
 			if err != nil {
 				s.sendErrResponse(wsConn, err.Error())
 				continue
 			}
-			subscriptions[subID] = unsubFn
+			subscriptions[SubID] = unsubFn
 
 			res := &SubscriptionResponseJSON{
 				Jsonrpc: "2.0",
 				ID:      connID,
-				Result:  subID,
+				Result:  SubID,
 			}
 
 			if err := wsConn.WriteJSON(res); err != nil {
@@ -270,10 +276,10 @@ func (s *websocketsServer) readLoop(wsConn *wsConn) {
 				continue
 			}
 
-			subID := rpc.ID(id)
-			unsubFn, ok := subscriptions[subID]
+			SubID := rpc.ID(id)
+			unsubFn, ok := subscriptions[SubID]
 			if ok {
-				delete(subscriptions, subID)
+				delete(subscriptions, SubID)
 				unsubFn()
 			}
 
@@ -359,7 +365,7 @@ func newPubSubAPI(clientCtx client.Context, logger log.Logger, tmWSClient *rpccl
 	}
 }
 
-func (api *pubSubAPI) subscribe(wsConn *wsConn, subID rpc.ID, params []interface{}) (pubsub.UnsubscribeFunc, error) {
+func (api *pubSubAPI) subscribe(wsConn *wsConn, SubID rpc.ID, params []interface{}) (pubsub.UnsubscribeFunc, error) {
 	method, ok := params[0].(string)
 	if !ok {
 		return nil, errors.New("invalid parameters")
@@ -368,22 +374,22 @@ func (api *pubSubAPI) subscribe(wsConn *wsConn, subID rpc.ID, params []interface
 	switch method {
 	case "newHeads":
 		// TODO: handle extra params
-		return api.subscribeNewHeads(wsConn, subID)
+		return api.subscribeNewHeads(wsConn, SubID)
 	case "logs":
 		if len(params) > 1 {
-			return api.subscribeLogs(wsConn, subID, params[1])
+			return api.subscribeLogs(wsConn, SubID, params[1])
 		}
-		return api.subscribeLogs(wsConn, subID, nil)
+		return api.subscribeLogs(wsConn, SubID, nil)
 	case "newPendingTransactions":
-		return api.subscribePendingTransactions(wsConn, subID)
+		return api.subscribePendingTransactions(wsConn, SubID)
 	case "syncing":
-		return api.subscribeSyncing(wsConn, subID)
+		return api.subscribeSyncing(wsConn, SubID)
 	default:
 		return nil, errors.Errorf("unsupported method %s", method)
 	}
 }
 
-func (api *pubSubAPI) subscribeNewHeads(wsConn *wsConn, subID rpc.ID) (pubsub.UnsubscribeFunc, error) {
+func (api *pubSubAPI) subscribeNewHeads(wsConn *wsConn, SubID rpc.ID) (pubsub.UnsubscribeFunc, error) {
 	sub, unsubFn, err := api.events.SubscribeNewHeads()
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating block filter")
@@ -415,7 +421,7 @@ func (api *pubSubAPI) subscribeNewHeads(wsConn *wsConn, subID rpc.ID) (pubsub.Un
 					Jsonrpc: "2.0",
 					Method:  "eth_subscription",
 					Params: &SubscriptionResult{
-						Subscription: subID,
+						Subscription: SubID,
 						Result:       header,
 					},
 				}
@@ -434,7 +440,7 @@ func (api *pubSubAPI) subscribeNewHeads(wsConn *wsConn, subID rpc.ID) (pubsub.Un
 				if !ok {
 					return
 				}
-				api.logger.Debug("dropping NewHeads WebSocket subscription", "subscription-id", subID, "error", err.Error())
+				api.logger.Debug("dropping NewHeads WebSocket subscription", "subscription-id", SubID, "error", err.Error())
 			}
 		}
 	}()
@@ -459,7 +465,7 @@ func try(fn func(), l log.Logger, desc string) {
 	fn()
 }
 
-func (api *pubSubAPI) subscribeLogs(wsConn *wsConn, subID rpc.ID, extra interface{}) (pubsub.UnsubscribeFunc, error) {
+func (api *pubSubAPI) subscribeLogs(wsConn *wsConn, SubID rpc.ID, extra interface{}) (pubsub.UnsubscribeFunc, error) {
 	crit := filters.FilterCriteria{}
 
 	if extra != nil {
@@ -597,7 +603,7 @@ func (api *pubSubAPI) subscribeLogs(wsConn *wsConn, subID rpc.ID, extra interfac
 						Jsonrpc: "2.0",
 						Method:  "eth_subscription",
 						Params: &SubscriptionResult{
-							Subscription: subID,
+							Subscription: SubID,
 							Result:       ethLog,
 						},
 					}
@@ -615,7 +621,7 @@ func (api *pubSubAPI) subscribeLogs(wsConn *wsConn, subID rpc.ID, extra interfac
 				if !ok {
 					return
 				}
-				api.logger.Debug("dropping Logs WebSocket subscription", "subscription-id", subID, "error", err.Error())
+				api.logger.Debug("dropping Logs WebSocket subscription", "subscription-id", SubID, "error", err.Error())
 			}
 		}
 	}()
@@ -623,7 +629,7 @@ func (api *pubSubAPI) subscribeLogs(wsConn *wsConn, subID rpc.ID, extra interfac
 	return unsubFn, nil
 }
 
-func (api *pubSubAPI) subscribePendingTransactions(wsConn *wsConn, subID rpc.ID) (pubsub.UnsubscribeFunc, error) {
+func (api *pubSubAPI) subscribePendingTransactions(wsConn *wsConn, SubID rpc.ID) (pubsub.UnsubscribeFunc, error) {
 	sub, unsubFn, err := api.events.SubscribePendingTxs()
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating block filter: %s")
@@ -653,7 +659,7 @@ func (api *pubSubAPI) subscribePendingTransactions(wsConn *wsConn, subID rpc.ID)
 						Jsonrpc: "2.0",
 						Method:  "eth_subscription",
 						Params: &SubscriptionResult{
-							Subscription: subID,
+							Subscription: SubID,
 							Result:       ethTx.Hash,
 						},
 					}
@@ -673,7 +679,7 @@ func (api *pubSubAPI) subscribePendingTransactions(wsConn *wsConn, subID rpc.ID)
 				if !ok {
 					return
 				}
-				api.logger.Debug("dropping PendingTransactions WebSocket subscription", subID, "error", err.Error())
+				api.logger.Debug("dropping PendingTransactions WebSocket subscription", SubID, "error", err.Error())
 			}
 		}
 	}()
@@ -681,7 +687,7 @@ func (api *pubSubAPI) subscribePendingTransactions(wsConn *wsConn, subID rpc.ID)
 	return unsubFn, nil
 }
 
-func (api *pubSubAPI) subscribeSyncing(wsConn *wsConn, subID rpc.ID) (pubsub.UnsubscribeFunc, error) {
+func (api *pubSubAPI) subscribeSyncing(wsConn *wsConn, SubID rpc.ID) (pubsub.UnsubscribeFunc, error) {
 	return nil, errors.New("syncing subscription is not implemented")
 }
 

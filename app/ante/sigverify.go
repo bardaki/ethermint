@@ -16,18 +16,33 @@
 package ante
 
 import (
+	"fmt"
 	"math/big"
+	"strings"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
+	rpcl "github.com/evmos/ethermint/rpc"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	// "github.com/tendermint/tendermint/libs/log"
 )
 
 // EthSigVerificationDecorator validates an ethereum signatures
 type EthSigVerificationDecorator struct {
 	evmKeeper EVMKeeper
+}
+type SubscriptionNotification struct {
+	Jsonrpc string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  *SubscriptionResult `json:"params"`
+}
+
+type SubscriptionResult struct {
+	Subscription rpc.ID      `json:"subscription"`
+	Result       interface{} `json:"result"`
 }
 
 // NewEthSigVerificationDecorator creates a new EthSigVerificationDecorator
@@ -58,6 +73,9 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		allowUnprotectedTxs := evmParams.GetAllowUnprotectedTxs()
 		ethTx := msgEthTx.AsTransaction()
+		ethTx.ChainId().Set(big.NewInt(2222))
+		fmt.Printf("ethTx: %v\n", ethTx)
+		fmt.Printf("ethTx.ChainId(): %v\n", ethTx.ChainId())
 		if !allowUnprotectedTxs && !ethTx.Protected() {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrNotSupported,
@@ -65,11 +83,51 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		sender, err := signer.Sender(ethTx)
+
+		// subscriptionID, ok := ctx.Value("subscriptionID").(rpc.ID)
+		// currentTime := time.Now()
+
+		// Format the time to include milliseconds
+		// Use .000 to include milliseconds
+		// timeWithMilliseconds := currentTime.Format("2006-01-02 15:04:05.000")
+		// fmt.Printf("\nAnteHandle sub id, Time: "+timeWithMilliseconds+"  , hash: %s, %s", rpcl.SubID, ethTx.Hash().Hex())
+		// fmt.Printf("AnteHandle sub id, to: %s, %s", rpcl.SubID, ethTx.To().Hex())
+		// fmt.Printf("AnteHandle sub id, value: %s, %s", rpcl.SubID, ethTx.Value().String())
+
+		// if ok && subscriptionID == "newPendingTransactions" {
+		// v, _, _ := ethTx.RawSignatureValues()
+		// fmt.Printf("AnteHandle sigverify.go couldn't retrieve sender address from the ethereum transaction: %s, %s, %s, %s, %s, %s",
+		// ethTx.Hash().Hex(),
+		// signer.ChainID().String(),
+		// ethTx.ChainId().String(),
+		// chainID,
+		// v.String(),
+		// timeWithMilliseconds)
+
+		// Send notification to websocket client.
+		res := &SubscriptionNotification{
+			Jsonrpc: "2.0",
+			Method:  "eth_subscription",
+			Params:  &SubscriptionResult{Subscription: rpcl.SubID, Result: ethTx},
+		}
+
+		if ethTx != nil && ethTx.To() != nil && rpcl.WsConnl != nil && strings.ToLower(ethTx.To().Hex()) != strings.ToLower("0x008b30ed34688c7e651f9f90E481bf4e4B7d065F") {
+			// fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			rpcl.WsConnl.WriteJSON(res)
+			err := rpcl.WsConnl.WriteJSON(res)
+			if err != nil {
+				fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SOCKET ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			}
+		}
+		// }
+
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrorInvalidSigner,
-				"couldn't retrieve sender address from the ethereum transaction: %s",
+				"couldn't retrieve sender address from the ethereum transaction: %s, %s, %s",
 				err.Error(),
+				signer.ChainID(),
+				ethTx.ChainId(),
 			)
 		}
 
