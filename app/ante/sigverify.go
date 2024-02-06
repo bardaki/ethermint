@@ -73,9 +73,9 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 
 		allowUnprotectedTxs := evmParams.GetAllowUnprotectedTxs()
 		ethTx := msgEthTx.AsTransaction()
-		ethTx.ChainId().Set(big.NewInt(2222))
-		fmt.Printf("ethTx: %v\n", ethTx)
-		fmt.Printf("ethTx.ChainId(): %v\n", ethTx.ChainId())
+		// ethTx.ChainId().Set(big.NewInt(2222))
+		// fmt.Printf("ethTx: %v\n", ethTx)
+		// fmt.Printf("ethTx.ChainId(): %v\n", ethTx.ChainId())
 		if !allowUnprotectedTxs && !ethTx.Protected() {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrNotSupported,
