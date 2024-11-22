@@ -48,6 +48,9 @@ import (
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 )
 
+var WsConnl *wsConn
+var SubID rpc.ID
+
 type WebsocketsServer interface {
 	Start()
 }

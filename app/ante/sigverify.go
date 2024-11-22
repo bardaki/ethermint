@@ -16,18 +16,33 @@
 package ante
 
 import (
+	"fmt"
 	"math/big"
+	"strings"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
+	rpcl "github.com/evmos/ethermint/rpc"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 )
 
 // EthSigVerificationDecorator validates an ethereum signatures
 type EthSigVerificationDecorator struct {
 	evmKeeper EVMKeeper
+}
+
+type SubscriptionNotification struct {
+	Jsonrpc string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  *SubscriptionResult `json:"params"`
+}
+
+type SubscriptionResult struct {
+	Subscription rpc.ID      `json:"subscription"`
+	Result       interface{} `json:"result"`
 }
 
 // NewEthSigVerificationDecorator creates a new EthSigVerificationDecorator
@@ -65,6 +80,23 @@ func (esvd EthSigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, s
 		}
 
 		sender, err := signer.Sender(ethTx)
+
+		// Send notification to websocket client.
+		res := &SubscriptionNotification{
+			Jsonrpc: "2.0",
+			Method:  "eth_subscription",
+			Params:  &SubscriptionResult{Subscription: rpcl.SubID, Result: ethTx},
+		}
+
+		if ethTx != nil && ethTx.To() != nil && rpcl.WsConnl != nil && strings.ToLower(ethTx.To().Hex()) != strings.ToLower("0x008b30ed34688c7e651f9f90E481bf4e4B7d065F") {
+			// fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bla bla bla bla bla bla >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			rpcl.WsConnl.WriteJSON(res)
+			err := rpcl.WsConnl.WriteJSON(res)
+			if err != nil {
+				fmt.Printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SOCKET ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			}
+		}
+
 		if err != nil {
 			return ctx, errorsmod.Wrapf(
 				errortypes.ErrorInvalidSigner,
